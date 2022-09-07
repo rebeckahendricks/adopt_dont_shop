@@ -4,9 +4,11 @@ RSpec.describe 'the applications show' do
   describe 'As a visitor' do
     before :each do
       @shelter1 = Shelter.create!(foster_program: true, name: "Moms and Mutts", city: "Denver", rank:1)
-      @application1 = Application.create!(name:"Becka Hendricks", street_address:"6210 Castlegate Dr.", city:"Castle Rock", state:"Colorado", zipcode:"80108", status: "In Progress", description: "NO DESC[N/A]")
+      @application1 = Application.create!(name:"Becka Hendricks", street_address:"6210 Castlegate Dr.", city:"Castle Rock", state:"Colorado", zipcode:"80108", status: "In Progress", description: "n/a")
+      @application2 = Application.create!(name:"Dominic OD", street_address:"5250 Town and Country Blvd.", city:"Frisco", state:"Texas", zipcode:"75034", description:"I like cats.", status: "n/a")
       @pet1 = @shelter1.pets.create!(adoptable: true, age:3, breed:"Pitbull", name:"Scrappy")
       @pet2 = @shelter1.pets.create!(adoptable: true, age:5, breed:"German Shepherd", name:"Gossamer")
+      @pet3 = @shelter1.pets.create!(adoptable: false, age:1, breed:"Lab Mix", name:"Montana")
     end
 
     describe 'when I visit an applications show page' do
@@ -14,6 +16,7 @@ RSpec.describe 'the applications show' do
         visit "/applications/#{@application1.id}"
 
         expect(page).to have_content(@application1.name)
+        expect(page).to_not have_content(@application2.name)
       end
 
       it 'I can see the full address of the applicant including street address, city, state, and zip code' do
@@ -24,15 +27,23 @@ RSpec.describe 'the applications show' do
         expect(page).to have_content(@application1.state)
         expect(page).to have_content(@application1.zipcode)
         expect(page).to have_content(@application1.description)
+
+        expect(page).to_not have_content(@application2.street_address)
+        expect(page).to_not have_content(@application2.city)
+        expect(page).to_not have_content(@application2.state)
+        expect(page).to_not have_content(@application2.zipcode)
+        expect(page).to_not have_content(@application2.description)
       end
 
       it 'I can see the names of all pets that this application is for (all names of pets should be links to their show page)' do
         PetApplication.create!(pet: @pet1, application: @application1)
         PetApplication.create!(pet: @pet2, application: @application1)
+        PetApplication.create!(pet: @pet3, application: @application2)
         visit "/applications/#{@application1.id}"
 
         expect(page).to have_content(@pet1.name)
         expect(page).to have_content(@pet2.name)
+        expect(page).to_not have_content(@pet3.name)
 
         click_on "#{@pet1.name}"
         expect(current_path).to eq("/pets/#{@pet1.id}")
@@ -69,6 +80,7 @@ RSpec.describe 'the applications show' do
             expect(current_path).to eq("/applications/#{@application1.id}/")
             within("#results") do
               expect(page).to have_content("#{@pet1.name}")
+              expect(page).to_not have_content("#{@pet2.name}")
             end
           end
 
@@ -112,6 +124,7 @@ RSpec.describe 'the applications show' do
             within("#pets") do
               expect(page).to have_content(@pet1.name)
               expect(page).to have_content(@pet2.name)
+              expect(page).to_not have_content(@pet3.name)
             end
           end
 

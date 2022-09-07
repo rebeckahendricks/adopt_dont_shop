@@ -6,6 +6,11 @@ RSpec.describe PetApplication, type: :model do
     it { should belong_to(:application) }
   end
 
+  describe 'validations' do
+    it { should validate_presence_of(:pet_id) }
+    it { should validate_presence_of(:application_id) }
+  end
+
   before(:each) do
     @shelter1 = Shelter.create!(foster_program: true, name: "Moms and Mutts", city: "Denver", rank:1)
     @application = Application.create!(name:"Becka Hendricks", street_address:"6210 Castlegate Dr.", city:"Castle Rock", state:"Colorado", zipcode:"80108", status: "In Progress", description: "NO DESC[N/A]")
